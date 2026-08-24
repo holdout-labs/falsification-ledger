@@ -18,7 +18,7 @@ then adjudicate honestly and measure your hit rate against a random
 baseline. Python 3.11+, one dependency (`jsonschema`), Windows / Linux /
 macOS.
 
-**Status:** v0.1 —alpha. The ledger semantics are distilled from a
+**Status:** v0.1.1 alpha, published on PyPI. The ledger semantics are distilled from a
 production research pipeline, but this standalone package is new: expect the
 CLI and schemas to shift before v1.0.
 
@@ -76,7 +76,7 @@ baseline?* (Wilson 95% CI vs the most common actual verdict.)
 ## Quick start
 
 ```bash
-# install from PyPI (once published)
+# install the published package from PyPI
 pip install falsification-ledger
 
 # or run without installing anything:
