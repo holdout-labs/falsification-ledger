@@ -1,0 +1,78 @@
+# Real `fl report` output — falsification-ledger 0.1.1 (2026-08-26)
+
+Demo ledger: 8 pre-registered cases (`fl init` + `fl preregister` × 8 +
+`fl adjudicate` × 8), then:
+
+```bash
+$ fl verify --state-dir ~/.research-ledger
+```
+
+```json
+{
+  "exists": true,
+  "ok": true,
+  "events": 16,
+  "first_bad_line": null,
+  "problems": []
+}
+```
+
+```bash
+$ fl report --state-dir ~/.research-ledger --min-cases 5
+```
+
+```json
+{
+  "schema_version": "falsification_ledger.prediction_report.v1",
+  "generated_at": "2026-08-26T20:43:29+08:00",
+  "min_cases": 5,
+  "resolved_cases": 8,
+  "unresolved_cases": 0,
+  "registered_total": 8,
+  "completeness": 1.0,
+  "certain_cases": 7,
+  "uncertain_cases": 1,
+  "participation": 0.875,
+  "hit_rate": 0.7143,
+  "wilson_ci_95": [
+    0.3589,
+    0.9178
+  ],
+  "random_baseline": 0.5714,
+  "baseline_in_ci": true,
+  "actual_verdict_distribution": {
+    "support": 4,
+    "against": 3
+  },
+  "by_source_type": {
+    "pipeline": {
+      "resolved": 3,
+      "certain": 3,
+      "hits": 3,
+      "hit_rate": 1.0
+    },
+    "paper": {
+      "resolved": 3,
+      "certain": 3,
+      "hits": 2,
+      "hit_rate": 0.6666666666666666
+    },
+    "business": {
+      "resolved": 2,
+      "certain": 1,
+      "hits": 0,
+      "hit_rate": 0.0
+    }
+  },
+  "verdict_ready": true,
+  "verdict_rule": "hit = expected_verdict == actual_verdict, only over certain expectations; uncertain expectations count into participation; ready when resolved>=min_cases and completeness>=0.9 and participation>=0.7; if wilson_ci_95 contains random_baseline -> no systematic signal",
+  "safety": {
+    "production_effect": false,
+    "changes_probability": false,
+    "allow_real_trade": false
+  }
+}
+```
+
+Reproduce: `python examples/demo.py` (creates a scratch ledger under a temp
+dir), or build your own with `fl init` / `fl preregister` / `fl adjudicate`.

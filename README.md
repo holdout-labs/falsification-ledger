@@ -80,6 +80,16 @@ and a one-field change breaks the chain at a specific line number:
 
 ![fl verify tamper detection](docs/demo-verify.gif)
 
+And the report speaks plainly. On a real 8-case demo ledger, `fl report`
+answers the only question that matters — *are you better than a coin flip?*:
+
+![fl report output](docs/report-example.png)
+
+Full JSON: [docs/report-example.txt](docs/report-example.txt) — hit rate
+0.71 with a 95% Wilson CI of [0.36, 0.92] against a 0.57 random baseline:
+**baseline inside CI, so the report says "no systematic signal" — and refuses
+to pretend otherwise.**
+
 ## Quick start
 
 ```bash
