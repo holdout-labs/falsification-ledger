@@ -73,6 +73,13 @@ baseline?* (Wilson 95% CI vs the most common actual verdict.)
   JSON Schema and computes content IDs, so gates can trust the evidence
   without trusting the messenger.
 
+## See it in action
+
+`fl verify` catching a retroactive edit — every event is a hash-chain link,
+and a one-field change breaks the chain at a specific line number:
+
+![fl verify tamper detection](docs/demo-verify.gif)
+
 ## Quick start
 
 ```bash
