@@ -5,6 +5,8 @@
 ![CI](https://github.com/holdout-labs/falsification-ledger/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
+> 收录于 [awesome-quant](https://github.com/wilsonfreitas/awesome-quant) —— 量化库精选清单（Trading & Backtesting 板块）。
+
 ## 中文说明
 
 `falsification-ledger` 是量化研究的可验证实验记录本，也适用于 A 股回测。
