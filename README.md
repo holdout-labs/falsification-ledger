@@ -2,7 +2,7 @@
 
 ![PyPI version](https://img.shields.io/pypi/v/falsification-ledger.svg)
 ![PyPI downloads](https://img.shields.io/pypi/dm/falsification-ledger.svg)
-![CI](https://github.com/foolproof-labs/falsification-ledger/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/holdout-labs/falsification-ledger/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## 中文说明
@@ -172,7 +172,7 @@ A falsification report is the machine-readable evidence produced by an
 independent check (null-model randomization, OOS rank IC, FDR correction,
 protocol deviation, effect CI, cost sensitivity, ...). The contract:
 
-- schema: [`schema/falsification-report.schema.json`](https://github.com/foolproof-labs/falsification-ledger/blob/main/schema/falsification-report.schema.json)
+- schema: [`schema/falsification-report.schema.json`](https://github.com/holdout-labs/falsification-ledger/blob/main/schema/falsification-report.schema.json)
   (draft 2020-12, `additionalProperties: false`, fail-closed);
 - content ID: `sha256:` over `domain-prefix || 0x00 || canonical JSON` —  the same report always yields the same ID, a one-field change yields a
   different ID;
@@ -210,15 +210,15 @@ and 3.12. Issues are handled on weekends; pull requests are welcome.
 
 ## Project family
 
-Part of [Foolproof Labs](https://github.com/foolproof-labs) — a toolchain
+Part of [Holdout](https://github.com/holdout-labs) — a toolchain
 against self-deception in quantitative research:
 
-- [pit-adjuster](https://github.com/foolproof-labs/pit-adjuster) — PIT back-adjustment with static forward-adjustment drift detection
-- [falsification-ledger](https://github.com/foolproof-labs/falsification-ledger) — pre-registration and falsification ledger
-- [factor-qc](https://github.com/foolproof-labs/factor-qc) — fail-closed backtest quality gate
-- [lesson-book](https://github.com/foolproof-labs/lesson-book) — tuition memory for traders
-- [lookahead-free](https://github.com/foolproof-labs/lookahead-free) — verifiable look-ahead-freedom checks
-- [ashare-data-immunity](https://github.com/foolproof-labs/ashare-data-immunity) — data immunity for A-share daily bars
+- [pit-adjuster](https://github.com/holdout-labs/pit-adjuster) — PIT back-adjustment with static forward-adjustment drift detection
+- [falsification-ledger](https://github.com/holdout-labs/falsification-ledger) — pre-registration and falsification ledger
+- [factor-qc](https://github.com/holdout-labs/factor-qc) — fail-closed backtest quality gate
+- [lesson-book](https://github.com/holdout-labs/lesson-book) — tuition memory for traders
+- [lookahead-free](https://github.com/holdout-labs/lookahead-free) — verifiable look-ahead-freedom checks
+- [ashare-data-immunity](https://github.com/holdout-labs/ashare-data-immunity) — data immunity for A-share daily bars
 
 Sister org: [Metabolism Tools](https://github.com/metabolism-tools) — [`workspace-metabolism`](https://github.com/metabolism-tools/workspace-metabolism), policy-driven file lifecycle management for agentic workspaces.
 
