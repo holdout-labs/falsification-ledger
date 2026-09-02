@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/metabolism-tools/falsification-ledger/schema/falsification-report.schema.json",
+  "$id": "https://github.com/holdout-labs/falsification-ledger/schema/falsification-report.schema.json",
   "title": "FalsificationReport v1",
   "note": "Independent statistical falsification report for a research candidate. Produced by a program isolated from the research and evaluation sides. Required evidence for falsification review and promotion gates. Contract v1: null-model construction is standardized; different implementations must agree within the declared p-value tolerance.",
   "type": "object",
