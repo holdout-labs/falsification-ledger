@@ -27,17 +27,34 @@ SCHEMA_VERSION = "falsification_ledger.falsification_report.v1"
 DOMAIN_PREFIX = "falsification-ledger/falsification-report.v1"
 CONSISTENCY_TOLERANCE = 0.005
 
-DEFAULT_SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schema" / SCHEMA_FILE
-
 _schema_cache: dict[str, Any] | None = None
+
+
+def _default_schema_text() -> str:
+    """Read the bundled schema, wherever the package was installed from.
+
+    Prefers the schema shipped inside the package (wheel/sdist since 0.1.2),
+    then falls back to the repository layout (``<repo>/schema/``) so an
+    editable checkout keeps working unchanged.
+    """
+    try:
+        from importlib.resources import files
+
+        return files("falsification_ledger").joinpath("schema", SCHEMA_FILE).read_text()
+    except Exception:
+        repo = Path(__file__).resolve().parents[2] / "schema" / SCHEMA_FILE
+        return repo.read_text(encoding="utf-8")
 
 
 def load_falsification_schema(schema_path: Path | str | None = None) -> dict[str, Any]:
     """Load and sanity-check the falsification report schema (cached)."""
     global _schema_cache
     if _schema_cache is None or schema_path is not None:
-        path = Path(schema_path) if schema_path is not None else DEFAULT_SCHEMA_PATH
-        schema = json.loads(path.read_text(encoding="utf-8"))
+        if schema_path is not None:
+            raw = Path(schema_path).read_text(encoding="utf-8")
+        else:
+            raw = _default_schema_text()
+        schema = json.loads(raw)
         jsonschema.Draft202012Validator.check_schema(schema)
         _schema_cache = schema
     return _schema_cache

@@ -87,21 +87,21 @@
 
 ## 快速开始
 
-```bash
-# 从 PyPI 安装（Python 3.11+）
-pip install falsification-ledger
+60 秒版——一条命令跑完整闭环（`fl demo` 将随 PyPI v0.1.2 发布；在那之前
+从仓库安装）：
 
-# 一条命令跑完整闭环——预注册、证据、诚实裁决、命中率，
-# 最后看 `fl verify` 在具体行号上抓出一次篡改：
+```bash
+pip install "falsification-ledger @ git+https://github.com/holdout-labs/falsification-ledger.git"
 fl demo
 ```
 
 `fl demo` 在临时目录的草稿账本上运行（无需清理）：先连同证伪契约一起预注册
 一项主张，提交一份独立的证伪报告，诚实裁决，打印命中率报告——然后故意改动
-账本里的一个字段，让 `fl verify` 指出断链的具体行号。从 `pip install` 到
+账本里的一个字段，让 `fl verify` 指出断链的具体行号。从安装到
 "这就是哈希链的意义"，大约 60 秒。
 
-手动走一遍完整流程：
+已发布的 PyPI 包（`pip install falsification-ledger`，v0.1.1）包含相同命令，
+只是没有 `demo`。手动走一遍完整流程：
 
 ```bash
 fl init --state-dir ~/.research-ledger

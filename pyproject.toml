@@ -30,6 +30,9 @@ falsification-ledger = "falsification_ledger.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+falsification_ledger = ["schema/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
