@@ -19,7 +19,7 @@
 并将你的命中率与随机基线进行对比。要求 Python 3.11+，仅一个依赖
 （`jsonschema`），支持 Windows / Linux / macOS。
 
-**状态：** v0.1.1 alpha，已发布到 PyPI。记录本的语义提炼自一套生产级研究
+**状态：** v0.1.3 alpha，已发布到 PyPI。记录本的语义提炼自一套生产级研究
 管线（pipeline），但这个独立包是新的：在 v1.0 之前，CLI 和 schema 预计
 还会变动。
 
