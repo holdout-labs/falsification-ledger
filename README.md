@@ -94,11 +94,10 @@ to pretend otherwise.**
 
 ## Quick start
 
-The 60-second version — the whole loop in one command (`fl demo` lands on
-PyPI in v0.1.2; install from the repo until then):
+The 60-second version — the whole loop in one command:
 
 ```bash
-pip install "falsification-ledger @ git+https://github.com/holdout-labs/falsification-ledger.git"
+pip install falsification-ledger
 fl demo
 ```
 
@@ -109,8 +108,7 @@ independent falsification report, adjudicates, and prints the hit-rate report
 line that broke the chain. About 60 seconds from install to "this is why
 the hash chain matters".
 
-The published PyPI package (`pip install falsification-ledger`, v0.1.1) has
-the same commands minus `demo`. The same loop, command by command:
+The same loop, command by command:
 
 ```bash
 fl init --state-dir ~/.research-ledger

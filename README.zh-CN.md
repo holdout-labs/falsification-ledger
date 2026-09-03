@@ -87,11 +87,10 @@
 
 ## 快速开始
 
-60 秒版——一条命令跑完整闭环（`fl demo` 将随 PyPI v0.1.2 发布；在那之前
-从仓库安装）：
+60 秒版——一条命令跑完整闭环：
 
 ```bash
-pip install "falsification-ledger @ git+https://github.com/holdout-labs/falsification-ledger.git"
+pip install falsification-ledger
 fl demo
 ```
 
@@ -100,8 +99,7 @@ fl demo
 账本里的一个字段，让 `fl verify` 指出断链的具体行号。从安装到
 "这就是哈希链的意义"，大约 60 秒。
 
-已发布的 PyPI 包（`pip install falsification-ledger`，v0.1.1）包含相同命令，
-只是没有 `demo`。手动走一遍完整流程：
+手动走一遍完整流程：
 
 ```bash
 fl init --state-dir ~/.research-ledger
