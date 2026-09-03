@@ -95,17 +95,22 @@ to pretend otherwise.**
 ## Quick start
 
 ```bash
-# install the published package from PyPI
+# install from PyPI (Python 3.11+)
 pip install falsification-ledger
 
-# or run without installing anything:
-#   PYTHONPATH=src python -m falsification_ledger --help
-
-# try the full loop on a scratch ledger (creates files under a temp dir)
-python examples/demo.py
+# the whole loop in one command — pre-register, evidence, honest verdict,
+# hit rate, then watch `fl verify` catch a tamper at a specific line number:
+fl demo
 ```
 
-The manual loop:
+`fl demo` runs on a scratch ledger under a temp dir (nothing to clean up): it
+pre-registers a claim together with its falsification contract, submits an
+independent falsification report, adjudicates, and prints the hit-rate report
+— then edits one field of the ledger and lets `fl verify` name the exact
+line that broke the chain. About 60 seconds from `pip install` to "this is
+why the hash chain matters".
+
+The same loop, command by command:
 
 ```bash
 fl init --state-dir ~/.research-ledger
@@ -144,6 +149,7 @@ fl verify --state-dir ~/.research-ledger
 | `adjudicate` | Backfill the actual verdict for a registered case (register required; once per case) |
 | `report` | Hit-rate report: resolved cases, completeness, participation, hit rate with **Wilson 95% CI**, random baseline, per-source-type breakdown, `verdict_ready` gate |
 | `verify` | Recompute the hash chain of the whole ledger; detects any edit, insertion, or reordering |
+| `demo` | 60-second intro on a scratch ledger: full preregister → submit → adjudicate → report → verify loop, then a deliberate tamper that `verify` catches at a specific line |
 | `version` | Print version |
 
 Global flag: `--state-dir` on every stateful command (default: none —the

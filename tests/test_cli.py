@@ -131,3 +131,13 @@ def test_cli_verify_detects_tamper(state) -> None:
     lines[0] = lines[0][:-1] + "0"
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     assert main(["verify", "--state-dir", state]) == 1
+
+
+def test_cli_demo_runs_full_loop_and_proves_tamper_detection(capsys) -> None:
+    """`fl demo` must walk the whole loop and end with a caught tamper."""
+    assert main(["demo"]) == 0
+    out = capsys.readouterr().out
+    assert "ledger intact: True" in out          # step 5: chain verified clean
+    assert "content_id" in out                    # step 2: evidence submitted
+    assert "edit detected at line 1" in out       # step 6: tamper caught
+    assert "verify exits 1" in out

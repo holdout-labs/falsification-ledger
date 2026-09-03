@@ -88,15 +88,18 @@
 ## 快速开始
 
 ```bash
-# install the published package from PyPI
+# 从 PyPI 安装（Python 3.11+）
 pip install falsification-ledger
 
-# or run without installing anything:
-#   PYTHONPATH=src python -m falsification_ledger --help
-
-# try the full loop on a scratch ledger (creates files under a temp dir)
-python examples/demo.py
+# 一条命令跑完整闭环——预注册、证据、诚实裁决、命中率，
+# 最后看 `fl verify` 在具体行号上抓出一次篡改：
+fl demo
 ```
+
+`fl demo` 在临时目录的草稿账本上运行（无需清理）：先连同证伪契约一起预注册
+一项主张，提交一份独立的证伪报告，诚实裁决，打印命中率报告——然后故意改动
+账本里的一个字段，让 `fl verify` 指出断链的具体行号。从 `pip install` 到
+"这就是哈希链的意义"，大约 60 秒。
 
 手动走一遍完整流程：
 
@@ -137,6 +140,7 @@ fl verify --state-dir ~/.research-ledger
 | `adjudicate` | 为已登记的 case 补记实际裁决（必须先登记；每个 case 只能一次） |
 | `report` | 命中率报告：已裁决的 case 数、完整性、参与度、带 **Wilson 95% 置信区间** 的命中率、随机基线、按 source type 的细分、`verdict_ready` 关卡 |
 | `verify` | 重新计算整个记录本的哈希链；检测任何修改、插入或重排 |
+| `demo` | 60 秒入门：在草稿账本上跑完整闭环（预注册 → 提交 → 裁决 → 报告 → 验证），最后故意篡改一个字段并让 `verify` 在具体行号上抓到 |
 | `version` | 打印版本号 |
 
 全局标志：每个有状态的命令都支持 `--state-dir`（默认：无——记录本路径始终
