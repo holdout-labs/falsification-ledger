@@ -1,0 +1,11 @@
+# falsification-ledger
+
+> Hash-chained, append-only pre-registration ledger for research claims: write down the hypothesis and the evidence that would kill it BEFORE seeing the data, then adjudicate honestly and measure your hit rate against a random baseline (Wilson 95% CI). MIT, Python 3.11+, one dependency (jsonschema).
+
+- GitHub: https://github.com/holdout-labs/falsification-ledger
+- PyPI: https://pypi.org/project/falsification-ledger/
+- Install: `pip install falsification-ledger`
+- 60-second intro: `fl demo` (pre-register -> evidence -> verdict -> hit rate, then a deliberate tamper that `fl verify` catches at a specific line)
+- Commands: `fl init`, `fl preregister`, `fl submit`, `fl adjudicate`, `fl report`, `fl verify`, `fl demo`, `fl version`
+- Featured in awesome-quant (Trading & Backtesting section): https://github.com/wilsonfreitas/awesome-quant
+- Full documentation: https://github.com/holdout-labs/falsification-ledger/blob/main/README.md
