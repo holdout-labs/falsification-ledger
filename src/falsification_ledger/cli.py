@@ -8,6 +8,9 @@ Subcommands:
 - ``submit``               validate a falsification report and print its
                            content ID and evidence status (read-only)
 - ``adjudicate``           backfill the actual verdict for a case
+- ``conformance``          check an evidence report against the criteria
+                           pre-registered in the contract (read-only,
+                           fail-closed)
 - ``report``               hit-rate report (Wilson 95% CI vs random baseline)
 - ``verify``               hash-chain integrity check of the whole ledger
 - ``demo``                 run the full loop on a scratch ledger, then prove
@@ -25,10 +28,17 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
-from .contracts import evidence_status, falsification_object_id, validate_falsification_report
+from .contracts import (
+    criteria_conformance,
+    evidence_status,
+    falsification_object_id,
+    validate_falsification_report,
+)
 from .ledger import (
     conclude_prediction,
+    has_prediction_registered,
     ledger_path,
+    prediction_contract,
     register_prediction,
     report_prediction_hitrate,
     verify_chain,
@@ -78,6 +88,20 @@ def build_parser() -> argparse.ArgumentParser:
     adjudicate.add_argument(
         "--verdict", required=True, choices=["support", "against", "uncertain"]
     )
+
+    conformance = sub.add_parser(
+        "conformance",
+        help=(
+            "check an evidence report against the criteria pre-registered "
+            "in the contract (read-only, fail-closed)"
+        ),
+    )
+    conformance.add_argument("--state-dir", required=True)
+    conformance.add_argument("--case-id", required=True)
+    conformance.add_argument("--report", required=True,
+                             help="falsification report JSON path")
+    conformance.add_argument("--schema", default=None,
+                             help="override schema JSON path")
 
     report = sub.add_parser("report", help="hit-rate report")
     report.add_argument("--state-dir", required=True)
@@ -261,6 +285,37 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "adjudicate":
         _print_json(conclude_prediction(args.state_dir, args.case_id, args.verdict))
         return 0
+
+    if args.command == "conformance":
+        report = _load_json_file(args.report)
+        registered = has_prediction_registered(args.state_dir, args.case_id)
+        schema_blockers = validate_falsification_report(report, args.schema)
+        contract = prediction_contract(args.state_dir, args.case_id) if registered else None
+        conformance_blockers = criteria_conformance(contract, report) if registered else []
+        criteria_declared: list[dict[str, Any]] = []
+        if isinstance(contract, dict) and isinstance(contract.get("criteria"), list):
+            for item in contract["criteria"]:
+                if isinstance(item, dict) and isinstance(item.get("name"), str):
+                    criteria_declared.append(
+                        {"name": item["name"], "required": item.get("required", True)}
+                    )
+        body = {
+            "case_id": args.case_id,
+            "registered": registered,
+            "criteria_declared": criteria_declared,
+            "criteria_outcomes": report.get("criteria_outcomes"),
+            "schema_blockers": schema_blockers,
+            "conformance_blockers": conformance_blockers,
+            "conformance": (
+                "pass"
+                if registered and not (schema_blockers or conformance_blockers)
+                else "blocked"
+            ),
+        }
+        if not registered:
+            body["error"] = f"register_required:{args.case_id}"
+        _print_json(body)
+        return 0 if body["conformance"] == "pass" else 1
 
     if args.command == "report":
         _print_json(report_prediction_hitrate(args.state_dir, min_cases=args.min_cases))

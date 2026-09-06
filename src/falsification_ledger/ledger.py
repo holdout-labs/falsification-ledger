@@ -141,6 +141,15 @@ def has_prediction_registered(state_dir: Path | str, case_id: str) -> bool:
     )
 
 
+def prediction_contract(state_dir: Path | str, case_id: str) -> dict[str, Any] | None:
+    """Return the falsification contract recorded at registration (or None)."""
+    path = ledger_path(state_dir)
+    for event in _load_events(path):
+        if event.get("case_id") == case_id and event.get("event") == "register":
+            return event.get("falsification_contract")
+    return None
+
+
 def ensure_prediction_registered(
     state_dir: Path | str,
     case_id: str,

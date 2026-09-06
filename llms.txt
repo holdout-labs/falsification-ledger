@@ -6,6 +6,6 @@
 - PyPI: https://pypi.org/project/falsification-ledger/
 - Install: `pip install falsification-ledger`
 - 60-second intro: `fl demo` (pre-register -> evidence -> verdict -> hit rate, then a deliberate tamper that `fl verify` catches at a specific line)
-- Commands: `fl init`, `fl preregister`, `fl submit`, `fl adjudicate`, `fl report`, `fl verify`, `fl demo`, `fl version`
+- Commands: `fl init`, `fl preregister`, `fl submit`, `fl adjudicate`, `fl conformance`, `fl report`, `fl verify`, `fl demo`, `fl version`
 - Featured in awesome-quant (Trading & Backtesting section): https://github.com/wilsonfreitas/awesome-quant
 - Full documentation: https://github.com/holdout-labs/falsification-ledger/blob/main/README.md

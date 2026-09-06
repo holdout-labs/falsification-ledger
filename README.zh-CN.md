@@ -19,7 +19,7 @@
 并将你的命中率与随机基线进行对比。要求 Python 3.11+，仅一个依赖
 （`jsonschema`），支持 Windows / Linux / macOS。
 
-**状态：** v0.1.3 alpha，已发布到 PyPI。记录本的语义提炼自一套生产级研究
+**状态：** v0.1.4 alpha，已发布到 PyPI。记录本的语义提炼自一套生产级研究
 管线（pipeline），但这个独立包是新的：在 v1.0 之前，CLI 和 schema 预计
 还会变动。
 
@@ -136,6 +136,7 @@ fl verify --state-dir ~/.research-ledger
 | `preregister` | 登记一项主张：`--case-id`、`--verdict`（support 支持 / against 反对 / uncertain 不确定）、`--reason`，可选 `--source-type`，可选 `--contract`（证伪契约 JSON）。同一 case 的重复登记会被拒绝 |
 | `submit` | 依据契约 schema 校验证伪报告；打印其内容 ID（`sha256:...`）和证据状态（`valid` 有效 / `invalid` 无效 / `missing` 缺失）。只读操作；遇到阻塞项时以非零退出码退出 |
 | `adjudicate` | 为已登记的 case 补记实际裁决（必须先登记；每个 case 只能一次） |
+| `conformance` | 用证据报告核对预注册契约里写死的裁决判据（预注册时的 `criteria` 对报告里的 `criteria_outcomes`）。默认拒绝（fail-closed）：`not_falsified` 的通过主张若建立在从未检验——或未通过——某条必需判据的证据上，即被拦截。只读操作；被拦截时以非零退出码退出 |
 | `report` | 命中率报告：已裁决的 case 数、完整性、参与度、带 **Wilson 95% 置信区间** 的命中率、随机基线、按 source type 的细分、`verdict_ready` 关卡 |
 | `verify` | 重新计算整个记录本的哈希链；检测任何修改、插入或重排 |
 | `demo` | 60 秒入门：在草稿账本上跑完整闭环（预注册 → 提交 → 裁决 → 报告 → 验证），最后故意篡改一个字段并让 `verify` 在具体行号上抓到 |
@@ -177,6 +178,49 @@ deviation、效应置信区间 effect CI、成本敏感性 cost sensitivity…�
   - `valid` 有效——符合规范，结论为 `not_falsified`（未被证伪），一致性完好；
   - `invalid` 无效——不符合规范，或结论为 `falsified`（已被证伪），或明确不一致；
   - `missing` 缺失——结论为 `inconclusive`（无定论）：视为*不存在*的证据。
+
+## 裁决一致性（adjudication conformance）
+
+预注册可以冻结的不只是方向，还有**通过主张必须满足的判据**。在自由格式的
+`falsification_contract` 之外，把它们声明成结构化列表：
+
+```json
+{"criteria": [
+  {"name": "primary_positive", "required": true,
+   "note": "主统计量为正且检验通过"},
+  {"name": "control_superiority", "required": true,
+   "note": "对照臂为正且配对检验通过，同窗口"},
+  {"name": "sample_complete", "required": false,
+   "note": "样本按完整交易计数，而非委托记录"}
+]}
+```
+
+证据报告随后逐条声明实际检验了什么：
+
+```json
+{"criteria_outcomes": [
+  {"name": "primary_positive", "outcome": "met"},
+  {"name": "control_superiority", "outcome": "met",
+   "note": "对齐窗口配对 t 检验，p=0.02"}
+]}
+```
+
+`fl conformance --state-dir <dir> --case-id <id> --report <file>` 用登记时
+冻结的判据核对报告（默认拒绝 fail-closed）：
+
+- 每条**必需**判据必须有且只有一个结果——承诺过要检验却没检验的判据会被
+  拦截（`criterion_not_covered`）；
+- `not_falsified` 的通过主张若存在任何必需判据结果不是 `met`，即被拦截
+  （`not_falsified_while_required_not_met`）——`violated`（违反）、
+  `not_tested`（未检验）和 `inconclusive`（无定论）都算数；
+- 非必需判据（`required: false`）与契约外多出的结果只作参考，永不拦截；
+- 契约不含 `criteria` 时无判据可查，恒为通过。
+
+这堵住了"裁决引擎的*实现*用比*预注册*承诺更少的条件放行"的漂移——正是
+2026-09 一套生产级影子裁决轮次踩中的失败形态（冻结契约要求对照臂为正且
+配对检验通过，放行却只看主统计量）。离线复现：
+[`examples/case_verdict_drift.py`](examples/case_verdict_drift.py)
+（`python examples/case_verdict_drift.py`，零依赖、自检退出码）。
 
 ## 验证模型
 

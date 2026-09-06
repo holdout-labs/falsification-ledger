@@ -20,7 +20,7 @@ then adjudicate honestly and measure your hit rate against a random
 baseline. Python 3.11+, one dependency (`jsonschema`), Windows / Linux /
 macOS.
 
-**Status:** v0.1.3 alpha, published on PyPI. The ledger semantics are distilled from a
+**Status:** v0.1.4 alpha, published on PyPI. The ledger semantics are distilled from a
 production research pipeline, but this standalone package is new: expect the
 CLI and schemas to shift before v1.0.
 
@@ -145,6 +145,7 @@ fl verify --state-dir ~/.research-ledger
 | `preregister` | Register a claim: `--case-id`, `--verdict` (support/against/uncertain), `--reason`, optional `--source-type`, optional `--contract` (falsification contract JSON). Duplicate registration for the same case is rejected |
 | `submit` | Validate a falsification report against the contract schema; print its content ID (`sha256:...`) and evidence status (`valid` / `invalid` / `missing`). Read-only; exits non-zero on blockers |
 | `adjudicate` | Backfill the actual verdict for a registered case (register required; once per case) |
+| `conformance` | Check an evidence report against the adjudication criteria pre-registered in the contract (`criteria` at preregister time vs `criteria_outcomes` in the report). Fail-closed: a pass claim (`not_falsified`) on evidence that never tested — or failed — a required criterion is blocked. Read-only; exits non-zero when blocked |
 | `report` | Hit-rate report: resolved cases, completeness, participation, hit rate with **Wilson 95% CI**, random baseline, per-source-type breakdown, `verdict_ready` gate |
 | `verify` | Recompute the hash chain of the whole ledger; detects any edit, insertion, or reordering |
 | `demo` | 60-second intro on a scratch ledger: full preregister → submit → adjudicate → report → verify loop, then a deliberate tamper that `verify` catches at a specific line |
@@ -187,6 +188,56 @@ protocol deviation, effect CI, cost sensitivity, ...). The contract:
   - `invalid` —non-conformant, or conclusion `falsified`, or explicitly
     inconsistent;
   - `missing` —conclusion `inconclusive`: treated as *absent* evidence.
+
+## Adjudication conformance
+
+A pre-registration can freeze more than a direction: it can freeze the
+**criteria** a pass claim must satisfy. Next to the free-form
+`falsification_contract`, declare them as a structured list:
+
+```json
+{"criteria": [
+  {"name": "primary_positive", "required": true,
+   "note": "primary statistic positive and its test passes"},
+  {"name": "control_superiority", "required": true,
+   "note": "control arm positive with a passing paired test, same window"},
+  {"name": "sample_complete", "required": false,
+   "note": "samples counted as completed trades, not order records"}
+]}
+```
+
+An evidence report then declares, per criterion, what was actually tested:
+
+```json
+{"criteria_outcomes": [
+  {"name": "primary_positive", "outcome": "met"},
+  {"name": "control_superiority", "outcome": "met",
+   "note": "paired t over aligned windows, p=0.02"}
+]}
+```
+
+`fl conformance --state-dir <dir> --case-id <id> --report <file>` checks the
+report against the criteria frozen at registration time (fail-closed):
+
+- every **required** criterion must have exactly one outcome — a report that
+  never tested a criterion you promised to test is blocked
+  (`criterion_not_covered`);
+- a `not_falsified` pass claim while any required criterion outcome is not
+  `met` is blocked (`not_falsified_while_required_not_met`) — `violated`,
+  `not_tested` and `inconclusive` all count against a pass claim;
+- non-required criteria (`required: false`) and extra undeclared outcomes are
+  informative only — they never block;
+- a contract without `criteria` declares nothing to check and always
+  conforms.
+
+This closes the drift where the *implementation* of a verdict engine passes
+cases on fewer conditions than the *pre-registration* promised — the exact
+failure a production shadow-verdict round hit in 2026-09 (pass claims on the
+primary statistic alone while the frozen contract required a positive
+control arm with a passing paired test). Offline reproduction:
+[`examples/case_verdict_drift.py`](examples/case_verdict_drift.py)
+(`python examples/case_verdict_drift.py`, zero dependencies, self-checking
+exit code).
 
 ## Verification model
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/holdout-labs/falsification-ledger/schema/falsification-report.schema.json",
   "title": "FalsificationReport v1",
-  "note": "Independent statistical falsification report for a research candidate. Produced by a program isolated from the research and evaluation sides. Required evidence for falsification review and promotion gates. Contract v1: null-model construction is standardized; different implementations must agree within the declared p-value tolerance.",
+  "note": "Independent statistical falsification report for a research candidate. Produced by a program isolated from the research and evaluation sides. Required evidence for falsification review and promotion gates. Contract v1: null-model construction is standardized; different implementations must agree within the declared p-value tolerance. Optional criteria_outcomes declare, per pre-registered adjudication criterion (contract criteria), what was actually tested and with what result (met / violated / not_tested / inconclusive).",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -67,6 +67,19 @@
     },
     "conclusion": {
       "enum": ["not_falsified", "falsified", "inconclusive"]
+    },
+    "criteria_outcomes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "outcome"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "outcome": {"enum": ["met", "violated", "not_tested", "inconclusive"]},
+          "note": {"type": "string"}
+        }
+      }
     },
     "consistency": {
       "type": "object",

@@ -26,6 +26,7 @@ SCHEMA_FILE = "falsification-report.schema.json"
 SCHEMA_VERSION = "falsification_ledger.falsification_report.v1"
 DOMAIN_PREFIX = "falsification-ledger/falsification-report.v1"
 CONSISTENCY_TOLERANCE = 0.005
+CRITERION_OUTCOMES = ("met", "violated", "not_tested", "inconclusive")
 
 _schema_cache: dict[str, Any] | None = None
 
@@ -122,3 +123,120 @@ def evidence_status(
     if consistency is not None and consistency.get("consistent") is False:
         return "invalid"
     return "valid"
+
+
+def criteria_conformance(
+    contract: dict[str, Any] | None,
+    report: dict[str, Any] | None,
+) -> list[str]:
+    """Fail-closed conformance check between the adjudication criteria a
+    contract declares and the criteria outcomes an evidence report declares.
+
+    A falsification contract may declare, next to its free-form description,
+    a structured ``criteria`` list — every condition that must hold for the
+    claim to survive review (a control arm outperforming with a passing
+    paired test, a minimum completed-sample count, a fixed observation
+    window, ...).  A falsification report may then declare
+    ``criteria_outcomes``: which of those criteria were actually tested and
+    with what result.  The check exists to catch the drift where a pass
+    claim (``conclusion: not_falsified``) rests on evidence that never
+    tested every criterion the researcher promised to test.
+
+    Rules (fail-closed; blockers are returned, never silently tolerated):
+
+    - ``contract.criteria``, when present, must be a non-empty array of
+      objects with a non-empty string ``name`` and an optional boolean
+      ``required`` (default ``true``);
+    - ``report.criteria_outcomes``, when present, must be an array of
+      objects with a non-empty string ``name`` and an outcome in
+      ``CRITERION_OUTCOMES``; names must not repeat;
+    - every *required* criterion of the contract must have exactly one
+      outcome in the report (missing -> ``criterion_not_covered``);
+    - a report concluding ``not_falsified`` while any required criterion
+      outcome is not ``met`` is blocked
+      (``not_falsified_while_required_not_met``);
+    - non-required criteria and extra undeclared outcomes are informative
+      only: they never block;
+    - a contract without ``criteria`` declares nothing to check and always
+      conforms.
+
+    Returns blocker strings; an empty list means conformant.
+    """
+    blockers: list[str] = []
+    if not isinstance(contract, dict):
+        return blockers
+    criteria = contract.get("criteria")
+    if criteria is None:
+        return blockers
+
+    declared: list[tuple[str, bool]] = []
+    seen: set[str] = set()
+    if not isinstance(criteria, list) or not criteria:
+        return ["contract_criteria_malformed: expected a non-empty array"]
+    for index, item in enumerate(criteria):
+        if (
+            not isinstance(item, dict)
+            or not isinstance(item.get("name"), str)
+            or not item["name"].strip()
+        ):
+            blockers.append(
+                f"contract_criteria_malformed: item {index} needs a "
+                "non-empty string 'name'"
+            )
+            continue
+        name = item["name"].strip()
+        if name in seen:
+            blockers.append(f"duplicate_criterion:{name}")
+        seen.add(name)
+        required = item.get("required", True)
+        if not isinstance(required, bool):
+            blockers.append(
+                f"contract_criteria_malformed: criterion {name!r} "
+                "'required' must be boolean"
+            )
+            required = True
+        declared.append((name, required))
+    if blockers:
+        return blockers
+
+    outcomes: dict[str, str] = {}
+    raw_outcomes = report.get("criteria_outcomes") if isinstance(report, dict) else None
+    if raw_outcomes is not None:
+        if not isinstance(raw_outcomes, list):
+            return ["report_criteria_outcomes_malformed: expected an array"]
+        for index, item in enumerate(raw_outcomes):
+            if (
+                not isinstance(item, dict)
+                or not isinstance(item.get("name"), str)
+                or not item["name"].strip()
+            ):
+                blockers.append(
+                    f"report_criteria_outcomes_malformed: item {index} needs "
+                    "a non-empty string 'name'"
+                )
+                continue
+            name = item["name"].strip()
+            outcome = item.get("outcome")
+            if outcome not in CRITERION_OUTCOMES:
+                blockers.append(
+                    f"report_criteria_outcomes_malformed: invalid outcome "
+                    f"{outcome!r} for {name!r}"
+                )
+                continue
+            if name in outcomes:
+                blockers.append(f"duplicate_outcome:{name}")
+            outcomes[name] = outcome
+        if blockers:
+            return blockers
+
+    conclusion = report.get("conclusion") if isinstance(report, dict) else None
+    for name, required in declared:
+        outcome = outcomes.get(name)
+        if required and outcome is None:
+            blockers.append(f"criterion_not_covered:{name}")
+        if conclusion == "not_falsified" and required and outcome != "met":
+            blockers.append(
+                f"not_falsified_while_required_not_met:{name}:"
+                f"{outcome or 'missing'}"
+            )
+    return blockers

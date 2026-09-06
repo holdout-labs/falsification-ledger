@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "falsification-ledger"
-version = "0.1.3"
+version = "0.1.4"
 description = "Hash-chained, append-only pre-registration ledger for research claims, with falsification contracts, adjudication, and Wilson-CI hit-rate reports."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -35,4 +35,3 @@ falsification_ledger = ["schema/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-

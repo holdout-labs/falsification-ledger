@@ -8,6 +8,7 @@ chain-verified; nothing here trades, prices, or decides.
 """
 
 from .contracts import (
+    criteria_conformance,
     evidence_status,
     falsification_object_id,
     load_falsification_schema,
@@ -18,21 +19,24 @@ from .ledger import (
     ensure_prediction_registered,
     has_prediction_registered,
     ledger_path,
+    prediction_contract,
     register_prediction,
     report_prediction_hitrate,
     verify_chain,
 )
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 __all__ = [
     "conclude_prediction",
+    "criteria_conformance",
     "ensure_prediction_registered",
     "evidence_status",
     "falsification_object_id",
     "has_prediction_registered",
     "ledger_path",
     "load_falsification_schema",
+    "prediction_contract",
     "register_prediction",
     "report_prediction_hitrate",
     "validate_falsification_report",
