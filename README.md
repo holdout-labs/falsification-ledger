@@ -7,6 +7,10 @@
 
 > Featured in [awesome-quant](https://github.com/wilsonfreitas/awesome-quant) — the curated list of quant libraries (Trading & Backtesting section).
 
+> Part of [Holdout](https://github.com/holdout-labs): open-source infrastructure for AI-assisted quantitative research. This tool owns the pre-registration and evidence-trail layer before an agent or researcher moves a claim forward.
+
+> 属于 Holdout：AI 辅助量化投研的开源基础设施。本工具负责预注册和证据留痕层，先写清楚什么证据能推翻结论，再让 agent 或研究者继续推进。
+
 ## 中文说明
 
 `falsification-ledger` 是量化研究的可验证实验记录本，也适用于 A 股回测。
