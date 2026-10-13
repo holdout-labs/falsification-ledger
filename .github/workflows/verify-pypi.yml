@@ -1,0 +1,52 @@
+name: verify-pypi
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact version already uploaded to PyPI (verification never uploads)
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      PIP_INDEX_URL: https://pypi.org/simple
+      PIP_EXTRA_INDEX_URL: ""
+      PIP_CONFIG_FILE: /dev/null
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Resolve and validate the intended version
+        id: release
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python - <<'PY'
+          import os, re
+          version = os.environ.get("REQUESTED_VERSION") or os.environ.get("RELEASE_TAG", "")
+          if version.startswith("v"):
+              version = version[1:]
+          if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:[A-Za-z0-9.+-]*)", version):
+              raise SystemExit("Provide a version such as 0.1.4 or a release tag v0.1.4")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"version={version}\n")
+          PY
+      - name: Verify the exact public PyPI installation
+        uses: holdout-labs/pypi-verify-action@2683ab01a3b5fd2feed75d78e028be5ef4b9b942
+        with:
+          package: falsification-ledger
+          version: ${{ steps.release.outputs.version }}
+          expected-files: |
+            falsification_ledger/__init__.py
+            falsification_ledger/cli.py
+            falsification_ledger/schema/*.json
+          smoke-commands: |
+            python -c "import importlib.metadata as m; import falsification_ledger as p; assert p.__version__ == m.version('falsification-ledger'), (p.__version__, m.version('falsification-ledger'))"
+            fl version
+            fl --help
